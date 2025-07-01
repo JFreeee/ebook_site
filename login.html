@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>那抓的图书馆</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .box0 {
+            width: 480px;
+            padding: 20px;
+            border: 1px solid #dddddd;
+            margin: 200px auto;
+            min-height: 100px;
+        }
+
+        .box0 h2 {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box0">
+        <h2>📚 图书下载</h2>
+        <form action="php/login.php" method="post">
+            <div class="form-group">
+                <label for="email">用户名</label>
+                <input type="email" name="email" class="form-control" id="email" placeholder="请输入邮箱地址">
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" name="password" class="form-control" id="password" placeholder="请输入密码">
+            </div>
+            <div class="d-flex justify-content-between">
+                <a href="zhuce.html" class="btn btn-secondary">注册</a>
+                <div class="text-right">
+                    <button type="submit" class="btn btn-primary">登录</button>
+                    <small><a href="index.php">不登录</a></small>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>
