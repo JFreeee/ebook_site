@@ -22,7 +22,7 @@ if($is && $is -> num_rows > 0){
         $_SESSION['is_admin'] = $admin;
         if($admin == 1){header("Location: ../admin.html");
             exit;}
-        header("Location: ../index.php");
+        header("Location: ../shouye.php");
         exit;
     }else{
         echo '密码不正确<br><a href="../login.html">重新登陆</a>';

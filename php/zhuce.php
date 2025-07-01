@@ -14,17 +14,17 @@ if(empty($password)){
 $sql = "select * from users where email = '$email'";
 $zhuce = "INSERT INTO users(email,password,is_admin) values('$email','$password',0)";
 
-$is = $db -> query($sql);
+$is = $con -> query($sql);
 
 //判断邮箱是否被注册
 if($is && $is -> num_rows > 0){
     echo "邮箱已被注册";
 }else{
-    $db -> query($zhuce);
-    echo '注册成功!3秒后跳转到<a href="../login.html">登录页面</a>...';
+    $con -> query($zhuce);
+    echo '注册成功!3秒后跳转到<a href="../index.html">登录页面</a>...';
     echo '<script>
         setTimeout(function(){
-            window.location.href = "../login.html";
+            window.location.href = "../index.html";
             },3000);
             </script>';
 }

@@ -1,4 +1,3 @@
-
 <?php
 $host = 'localhost';
 $username = 'root';
@@ -11,12 +10,9 @@ if($con -> connect_errno <> 0){
     echo "连接失败，";
     echo $con -> connect_error;
 }
+$con->set_charset("utf8mb4");
 
-// var_dump($db);
-
-
-
-
+// var_dump($con);
 
 //PDO方式
 // try{

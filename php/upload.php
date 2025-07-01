@@ -1,4 +1,6 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 session_start();
 if (!isset($_SESSION['email']) || $_SESSION['is_admin'] != 1) {
     die("无权访问");
@@ -25,4 +27,5 @@ $stmt->bind_param("sss", $title, $pic_name, $book_name);
 $stmt->execute();
 
 echo "<script>alert('上传成功');location.href='../upload.html';</script>";
+
 ?>
