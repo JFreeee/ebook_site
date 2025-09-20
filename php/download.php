@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['email'])) {
-    echo "<script>alert('请先登录'); window.location.href='index.html';</script>";
+    echo "<script>alert('请先登录'); window.location.href='login.html';</script>";
     exit;
 }
 

@@ -27,7 +27,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-custom px-4">
         <h2 class="mb-0 mr-4">👨‍👨‍👧‍👦| 用户管理</h2>&nbsp;&nbsp;&nbsp;&nbsp;
-        <input type="button" value="⬅返回首页" onclick="location='shouye.html'">
+        <input type="button" value="⬅返回首页" onclick="location='index.html'">
 
         <!-- 导航菜单 -->
         <ul class="navbar-nav ml-auto" id="nav-menu"></ul>
@@ -98,7 +98,7 @@
                                     </div>
                                 </li>`;
                         } else {
-                            navHtml = `<li class="nav-item"><a class="nav-link" href="index.html">登录</a></li>`;
+                            navHtml = `<li class="nav-item"><a class="nav-link" href="login.html">登录</a></li>`;
                         }
                         $('#nav-menu').html(navHtml);
                     },
@@ -118,7 +118,7 @@
                         loadMyBooks();
                     } else {
                         alert("请先登录！");
-                        window.location.href = "index.html";
+                        window.location.href = "login.html";
                     }
                 },
                 error: function () {
