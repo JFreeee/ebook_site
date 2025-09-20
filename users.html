@@ -122,7 +122,7 @@
                     }
                 },
                 error: function () {
-                    alert("请求失败，请稍后再试");
+                    alert("加载个人信息失败，请稍后再试");
                 }
             });
 
@@ -141,7 +141,7 @@
                                 <tr>
                                     <th>${user.email}</th>
                                     <th>${user.is_admin == 1 ? '<span style="color: blue;">管理员</span>'
-                                            : '普通用户'}</th>
+                                        : '普通用户'}</th>
                                     <th><button class="btn btn-danger btn-sm setAdmin" data-id="${user.id}" data-admin="${user.is_admin}">${user.is_admin == 1 ? "取消管理员" : "设置管理员"}</button></th>
                                     <th><button class="btn btn-danger btn-sm deleteUser" data-id="${user.id}">删除</button></th>
                                 </tr>
@@ -153,7 +153,7 @@
                         }
                     },
                     error: function () {
-                        alert("请求失败，请稍后再试");
+                        alert("加载所有用户信息失败，请稍后再试");
                     }
                 });
             }
@@ -203,7 +203,7 @@
                             console.log("textStatus:", textStatus);
                             console.log("errorThrown:", errorThrown);
                             console.log("响应内容:", jqXHR.responseText);
-                            alert("请求失败，请稍后重试");
+                            alert("删除失败，请稍后重试");
                         }
                     });
                 }
