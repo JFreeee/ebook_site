@@ -10,7 +10,9 @@ if (!isset($_SESSION['email'])) {
 include('../inc/db.php');
 
 $email = $_SESSION['email'];
+
 $title = $_POST['title'] ?? '';
+
 $pic   = $_FILES['pic'] ?? null;
 $book  = $_FILES['bookfile'] ?? null;
 
@@ -43,13 +45,38 @@ if ($book['error'] !== UPLOAD_ERR_OK) {
     exit;
 }
 
+// 校验文件名前缀必须和书名一致
+$picName  = pathinfo($pic['name'], PATHINFO_FILENAME);
+$bookName = pathinfo($book['name'], PATHINFO_FILENAME);
+
+// 检查合法字符（中文/英文/数字/下划线/短横线）
+function isValidName($name) {
+    return preg_match('/^[\w\-]+$/u', $name);
+}
+
+if (!isValidName($title) || !isValidName($picName) || !isValidName($bookName)) {
+    echo json_encode(["code" => 0, "msg" => "书名、图片名、文件名不能包含空格或特殊字符"]);
+    exit;
+}
+
+if ($title !== $picName|| $title !== $bookName) {
+    echo json_encode(["code" => 0, "msg" => "书名、图片名、图书文件名必须一致"]);
+    exit;
+}
+
 // 目标路径
 $picPath  = "../ziyuan/images/" . basename($pic['name']);
 $bookPath = "../ziyuan/books/" . basename($book['name']);
 
 // 移动文件
 if (!move_uploaded_file($pic['tmp_name'], $picPath)) {
-    echo json_encode(["code" => 0, "msg" => "封面图保存失败"]);
+    echo json_encode(["code" => 0,
+     "msg" => "封面图保存失败",
+    'error' => error_get_last(),
+        'debug' => [
+            'tmp_name' => $_FILES['pic']['tmp_name'],
+            'target' => $picPath,
+            'is_writable' => is_writable(dirname($picPath))]]);
     exit;
 }
 if (!move_uploaded_file($book['tmp_name'], $bookPath)) {

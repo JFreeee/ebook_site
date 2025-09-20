@@ -105,7 +105,7 @@
                     }
                 });
             }
-            
+
             //上传图书
             $("#uploadBtn").on("click", function () {
                 let title = $("#title").val();
@@ -117,10 +117,32 @@
                     return;
                 }
 
+                 // 文件名合法性校验函数
+                function isValidName(name) {
+                    return /^[\w\-]+$/.test(name); // 允许中文/英文/数字/下划线/短横线
+                }
+                // 去掉扩展名
+                let picName = pic.name.split(".")[0];
+                let bookName = bookfile.name.split(".")[0];
+
+                if (!isValidName(title) || !isValidName(picName) || !isValidName(bookName)) {
+                    $("#result").html(`<div class="alert alert-danger">书名、图片名、文件名不能有空格或特殊字符</div>`);
+                    return;
+                }
+
+                // 校验书名与图片和文件名称是否一致
+                if (title !== picName || title !== bookName) {
+                    $("#result").html(`<div class="alert alert-danger">书名、图片名、图书文件名必须一致</div>`);
+                    return;
+                }
+
                 let formData = new FormData();
                 formData.append("title", title);
                 formData.append("pic", pic);
                 formData.append("bookfile", bookfile);
+
+                // 按钮禁用 + 上传等待样式
+                $("#uploadBtn").prop("disabled", true).html("正在上传...");
 
                 $.ajax({
                     url: "php/upload.php",
@@ -135,9 +157,11 @@
                         } else {
                             $("#result").html(`<div class="alert alert-danger">${res.msg}</div>`);
                         }
+                        $("#uploadBtn").prop("disabled", false).html("上传"); // 恢复按钮
                     },
                     error: function () {
                         $("#result").html(`<div class="alert alert-danger">上传失败，请稍后重试</div>`);
+                        $("#uploadBtn").prop("disabled", false).html("上传"); // 恢复按钮
                     }
                 });
             });

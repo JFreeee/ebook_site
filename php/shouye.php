@@ -11,7 +11,7 @@ if ($keyword !== '') {
     $keyword = $con->real_escape_string($keyword);
     $sql = "SELECT id, title, pic FROM ebooks WHERE title LIKE '%$keyword%'";
 } else {
-    $sql = "SELECT id, title, pic FROM ebooks";
+    $sql = "SELECT id, title, pic FROM ebooks ORDER BY upload_time DESC";
 }
 
 $result = $con->query($sql);
