@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>那抓的图书馆</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .navbar-custom {
+            height: 65px;
+            background-color: #414951;
+            /* 深灰色背景 */
+        }
+
+        .navbar-custom h2 {
+            color: #fff;
+        }
+
+        .box0 {
+            width: 500px;
+            padding: 20px;
+            border: 1px solid #dddddd;
+            margin: 130px auto;
+            min-height: 100px;
+        }
+
+        .box0 h2 {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom px-4">
+        <h2 class="mb-0 mr-4">📚| 电子书下载网站</h2>
+    </nav>
+    <div class="box0">
+        <h2>👩🏻‍🎓用户注册</h2>
+
+        <div class="form-group">
+            <label for="email">用户名:</label>
+            <span id="res_email"></span>
+            <input type="email" name="email" class="form-control" id="email" placeholder="请输入邮箱地址">
+        </div>
+        <div class="form-group">
+            <label for="password">密码:</label>
+            <span id="res_password"></span>
+            <input type="password" name="password" class="form-control" id="password" placeholder="请输入密码" required>
+        </div>
+        <div class="form-group">
+            <label for="password">密码确认:</label>
+            <span id="res_password2"></span>
+            <input type="password" name="password2" class="form-control" id="password2" placeholder="请再次输入密码" required>
+        </div>
+
+        <div id="result" style="color:green; margin-top:20px;"></div>
+
+        <div class="d-flex justify-content-between">
+            <a href="index.html" class="btn btn-secondary">返回登陆</a>
+            <div class="text-right">
+                <button type="button" class="btn btn-primary" onclick="zhuce()">注册</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function zhuce() {
+            //清除上次的提示
+            $('#res_email').html('');
+            $('#res_password').html('');
+            $('#res_password2').html('');
+
+            $.ajax({
+                url: './php/zhuce.php',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    'email': $('#email').val().trim(),
+                    'password': $('#password').val().trim(),
+                    'password2': $('#password2').val().trim()
+                },
+                success: function (data) {
+                    if (data.code === 0) {
+                        $('#res_email').html(data.msg);
+                    } else if (data.code === 1) {
+                        $('#res_password').html(data.msg);
+                    } else if (data.code === 2) {
+                        $('#res_password2').html(data.msg);
+                    } else if (data.code === 100) {
+                        $('#result').html(data.msg);
+                        setTimeout(() => {
+                            window.location.href = "index.html";
+                        }, 3000);
+                    }
+                }
+            })
+
+        }
+    </script>
+
+</body>
+
+</html>

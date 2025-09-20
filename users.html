@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar-custom {
+            height: 65px;
+            background-color: #414951;
+        }
+
+        .navbar-custom h2,
+        .navbar-custom .nav-link,
+        .navbar-custom .dropdown-toggle {
+            color: #fff;
+        }
+
+        #username {
+            color: aqua;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom px-4">
+        <h2 class="mb-0 mr-4">👨‍👨‍👧‍👦| 用户管理</h2>&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" value="⬅返回首页" onclick="location='shouye.html'">
+
+        <!-- 导航菜单 -->
+        <ul class="navbar-nav ml-auto" id="nav-menu"></ul>
+    </nav>
+    <div class="container mt-5">
+        <!-- 账号名 -->
+        <div class="mb-3">
+            <h4>
+                管理员：<span id="username"></span>
+            </h4>
+
+        </div>
+        <table class="table table-bordered">
+            <!-- 表格头部 -->
+            <thead>
+                <tr>
+                    <th>用户</th>
+                    <th>权限</th>
+                    <th>操作</th>
+                    <th>删除</th>
+                </tr>
+            </thead>
+            <!-- 表格主体 -->
+            <tbody id="allUsers"></tbody>
+        </table>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(function () {
+            loadNav();
+            allUsers();
+            let loggedIn = false; // 全局保存登录状态
+            // 渲染导航栏
+            function loadNav() {
+                $.ajax({
+                    url: './php/shouye.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function (data) {
+                        loggedIn = data.loggedIn;  // ✅ 保存登录状态
+                        let navHtml = '';
+
+                        if (data.loggedIn) {
+
+                            // 公共部分
+                            let menuItems = `
+                                <a class="dropdown-item" href="mypage.html">个人主页</a>
+                                <a class="dropdown-item" href="upload.html">上传图书</a>
+                            `;
+
+                            // 如果是管理员，加一个「管理员页面」
+                            if (data.is_admin == 1) {
+                                menuItems = `
+                                    <a class="dropdown-item" href="admin.html">管理员页面</a>
+                                    ${menuItems}
+                                `;
+                            }
+                            navHtml = `
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+                                        ${data.email}
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        ${menuItems}
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#" id="logout-btn">退出登录</a>
+                                    </div>
+                                </li>`;
+                        } else {
+                            navHtml = `<li class="nav-item"><a class="nav-link" href="index.html">登录</a></li>`;
+                        }
+                        $('#nav-menu').html(navHtml);
+                    },
+                    error: function () {
+                        alert('加载导航栏失败');
+                    }
+                });
+            }
+            // 加载个人信息
+            $.ajax({
+                url: "./php/mypage.php",
+                type: "GET",
+                dataType: "json",
+                success: function (res) {
+                    if (res.code === 1) {
+                        $("#username").text(res.data.email);
+                        loadMyBooks();
+                    } else {
+                        alert("请先登录！");
+                        window.location.href = "index.html";
+                    }
+                },
+                error: function () {
+                    alert("请求失败，请稍后再试");
+                }
+            });
+
+
+            //加载所有用户信息
+            function allUsers() {
+                $.ajax({
+                    url: "./php/get_users.php",
+                    type: "GET",
+                    dataType: "json",
+                    success: function (res) {
+                        if (res.code === 1) {
+                            let html = "";
+                            res.data.users.forEach(user => {
+                                html += `
+                                <tr>
+                                    <th>${user.email}</th>
+                                    <th>${user.is_admin == 1 ? '<span style="color: blue;">管理员</span>'
+                                            : '普通用户'}</th>
+                                    <th><button class="btn btn-danger btn-sm setAdmin" data-id="${user.id}" data-admin="${user.is_admin}">${user.is_admin == 1 ? "取消管理员" : "设置管理员"}</button></th>
+                                    <th><button class="btn btn-danger btn-sm deleteUser" data-id="${user.id}">删除</button></th>
+                                </tr>
+                                `;
+                            });
+                            $("#allUsers").html(html);
+                        } else {
+                            alert("加载用户信息失败")
+                        }
+                    },
+                    error: function () {
+                        alert("请求失败，请稍后再试");
+                    }
+                });
+            }
+
+            // 设置 / 取消管理员
+            $(document).on("click", ".setAdmin", function () {
+                let $btn = $(this);
+                let id = $btn.data("id");
+                let isAdmin = $btn.data("admin"); // 当前状态
+
+                let action = isAdmin == 1 ? "取消管理员权限吗？" : "设置为管理员吗？";
+
+                if (confirm(action)) {
+                    $.ajax({
+                        url: "./php/set_admin.php",
+                        type: "POST",
+                        data: { id: id },
+                        dataType: "json",
+                        success: function (res) {
+                            alert(res.msg);
+                            if (res.code === 1) {
+                                allUsers()
+                            }
+                        }
+                    })
+                }
+            });
+            //删除账户
+            $(document).on("click", ".deleteUser", function () {
+                let $btn = $(this); // 当前点击的按钮
+                let id = $(this).data("id");
+
+                if (confirm("确定删除吗？")) {
+                    $.ajax({
+                        url: "./php/delete_user.php",
+                        type: "POST",
+                        data: { id: id },
+                        dataType: "json",
+                        success: function (res) {
+                            alert(res.msg);
+                            if (res.code === 1) {
+                                $btn.closest("tr").remove();
+                            };
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            console.log("AJAX请求失败");
+                            console.log("textStatus:", textStatus);
+                            console.log("errorThrown:", errorThrown);
+                            console.log("响应内容:", jqXHR.responseText);
+                            alert("请求失败，请稍后重试");
+                        }
+                    });
+                }
+            });
+
+            //退出登录
+            $(document).on('click', '#logout-btn', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: 'php/logout.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.success) {
+                            loadNav();   // 刷新导航栏
+                            loadBooks(); // 刷新书籍
+                        }
+                    },
+                    error: function () {
+                        alert('退出登录失败');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

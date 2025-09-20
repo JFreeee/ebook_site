@@ -1,0 +1,179 @@
+<?php session_start(); ?>
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>书籍详情</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar-custom {
+            height: 65px;
+            background-color: #414951;
+            /* 深灰色背景 */
+        }
+
+        .navbar-custom h2,
+        .navbar-custom .nav-link,
+        .navbar-custom .dropdown-toggle {
+            color: #fff;
+        }
+
+        #book-title,
+        .book-detail {
+            display: flex;
+            margin-top: 60px;
+            /* 向下移动 */
+            margin-left: 300px;
+            /* 向右移动 */
+
+        }
+
+        .book-detail img {
+            width: 200px;
+            height: auto;
+            margin-right: 20px;
+        }
+
+        .download-btn {
+
+            margin-top: 230px;
+            /* 向下移动 */
+            margin-left: 100px;
+            /* 向右移动 */
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-custom px-4">
+        <h2 class="mb-0 mr-4">📚| 电子书下载网站</h2> 
+        <input type="button" value="⬅返回首页" onclick="location='shouye.html'">
+        <!-- 导航菜单 -->
+        <ul class="navbar-nav ml-auto" id="nav-menu"></ul>
+    </nav>
+
+
+    <h3 id="book-title">图书标题</h3>
+
+    <div class="book-detail">
+        <!-- 左侧缩略图 -->
+        <img id="book-pic" src="" alt="封面">
+
+        <!-- 右侧下载按钮 -->
+        <div class="download-btn">
+            <a id="download-btn" href="#" class="btn btn-success btn-lg" download>📥 下载</a>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(function () {
+            let loggedIn = false; // 保存登录状态
+            // 渲染导航栏
+            function loadNav() {
+                $.ajax({
+                    url: './php/nav.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function (data) {
+                        loggedIn = data.loggedIn; // ✅ 保存登录状态
+                        let navHtml = '';
+                        if (data.loggedIn) {
+                            navHtml = `
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+                            ${data.email}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="mypage.html">个人主页</a>
+                            <a class="dropdown-item" href="upload.html">上传图书</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" id="logout-btn">退出登录</a>
+                        </div>
+                    </li>`;
+                        } else {
+                            navHtml = `<li class="nav-item"><a class="nav-link" href="index.html">登录</a></li>`;
+                        }
+                        $('#nav-menu').html(navHtml);
+                    },
+                    error: function () {
+                        alert('加载导航栏失败');
+                    }
+                });
+            }
+            loadNav();
+
+                // 下载按钮点击事件
+            $('#download-btn').click(function (e) {
+                e.preventDefault(); // 阻止默认跳转
+                if (!loggedIn) {
+                    alert('请先登录才能下载！');
+                    return;
+                }
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const bookId = urlParams.get('id');
+                if (!bookId) {
+                    alert('缺少书籍 ID');
+                    return;
+                }
+
+                // 已登录，跳转到 download.php 下载
+                window.location.href = 'php/download.php?id=' + bookId;
+            });
+
+            // 退出登录
+            $(document).on('click', '#logout-btn', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: 'php/logout.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.success) {
+                            loadNav();   // 刷新导航栏
+                            loadBooks(); // 刷新书籍
+                        }
+                    },
+                    error: function () {
+                        alert('退出登录失败');
+                    }
+                });
+            });
+
+            // 从 URL 获取书籍 ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookId = urlParams.get('id');
+
+            if (!bookId) {
+                alert("缺少书籍 ID");
+                return;
+            }
+
+            // AJAX 获取书籍信息
+            $.ajax({
+                url: 'php/get_book.php',
+                type: 'POST',
+                data: { id: bookId },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.success) {
+                        $('#book-title').text('《' + data.book.title + '》');
+                        $('#book-pic').attr('src', 'ziyuan/images/' + data.book.pic);  //给book-pic设置属性
+                        $('#download-btn').attr('href', 'php/download.php?id=' + bookId);
+                    } else {
+                        alert(data.msg);
+                    }
+                },
+                error: function () {
+                    alert('加载书籍详情失败');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

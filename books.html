@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图书管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar-custom {
+            height: 65px;
+            background-color: #414951;
+            /* 深灰色背景 */
+        }
+
+        .navbar-custom h2,
+        .navbar-custom .nav-link,
+        .navbar-custom .dropdown-toggle {
+            color: #fff;
+        }
+
+        h2 {
+            padding: 10px 0px;
+        }
+
+        #username {
+            color: aqua;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom px-4">
+        <h2 class="mb-0 mr-4">📖 图书管理</h2>&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" value="⬅返回首页" onclick="location='shouye.html'">
+
+        <!-- 导航菜单 -->
+        <ul class="navbar-nav ml-auto" id="nav-menu"></ul>
+    </nav>
+    <div class="container mt-5">
+        <!-- 账号名 -->
+        <div class="mb-3">
+            <h4>
+                管理员：<span id="username"></span>
+            </h4>
+        </div>
+
+        <table class="table table-bordered">
+            <!-- 表格头部 -->
+            <thead>
+                <tr>
+                    <th>封面</th>
+                    <th>书名</th>
+                    <th>上传人</th>
+                    <th>上传日期</th>
+                    <th>删除</th>
+                </tr>
+            </thead>
+            <!-- 表格主体 -->
+            <tbody id="allBooks"></tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(function () {
+            loadNav();
+            loadBooks();
+            // allUsers();
+            let loggedIn = false; // 全局保存登录状态
+            // 渲染导航栏
+            function loadNav() {
+                $.ajax({
+                    url: './php/shouye.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function (data) {
+                        loggedIn = data.loggedIn;  // ✅ 保存登录状态
+                        let navHtml = '';
+
+                        if (data.loggedIn) {
+
+                            // 公共部分
+                            let menuItems = `
+                                <a class="dropdown-item" href="mypage.html">个人主页</a>
+                                <a class="dropdown-item" href="upload.html">上传图书</a>
+                            `;
+
+                            // 如果是管理员，加一个「管理员页面」
+                            if (data.is_admin == 1) {
+                                menuItems = `
+                                    <a class="dropdown-item" href="admin.html">管理员页面</a>
+                                    ${menuItems}
+                                `;
+                            }
+                            navHtml = `
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+                                        ${data.email}
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        ${menuItems}
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#" id="logout-btn">退出登录</a>
+                                    </div>
+                                </li>`;
+                        } else {
+                            navHtml = `<li class="nav-item"><a class="nav-link" href="index.html">登录</a></li>`;
+                        }
+                        $('#nav-menu').html(navHtml);
+                    },
+                    error: function () {
+                        alert('加载导航栏失败');
+                    }
+                });
+            }
+
+            // 加载个人信息
+            $.ajax({
+                url: "./php/mypage.php",
+                type: "GET",
+                dataType: "json",
+                success: function (res) {
+                    if (res.code === 1) {
+                        $("#username").text(res.data.email);
+                    } else {
+                        alert("请先登录！");
+                        window.location.href = "index.html";
+                    }
+                },
+                error: function () {
+                    alert("请求失败，请稍后再试");
+                }
+            });
+
+            //获取全部图书
+            function loadBooks() {
+                $.ajax({
+                    url: "./php/get_allBooks.php",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (res) {
+                        if (res.code === 1) {
+                            let html = "";
+                            res.data.books.forEach(book => {
+                                html += `
+                                <tr>
+                                    <td><img src = "ziyuan/images/${book.pic}" style = "width:80px;"></td>
+                                    <td>《${book.title}》</td>
+                                    <td>${book.email}</td>
+                                    <td>${book.upload_time}</td>
+                                    <td><button class = "btn btn-danger btn-sm deleteBook" data-id="${book.id}">删除</button></td>
+                                </tr>
+                                `;
+                            });
+                            $("#allBooks").html(html);
+                        } else {
+
+                            alert("加载书籍失败，请重试")
+                        }
+                    },
+                    error: function () {
+                        alert("请求失败，请稍后再试");
+                    }
+                });
+            }
+
+            //删除图书
+            $(document).on("click", ".deleteBook", function () {
+                let $btn = $(this);  //点击当前的按钮
+                let id = $(this).data("id");
+
+                if (confirm("确定删除吗？")) {
+                    $.ajax({
+                        url: "./php/delete_allBooks.php",
+                        type: "POST",
+                        data: { id: id },
+                        dataType: "json",
+                        success: function (res) {    //res 是服务器返回的 JSON 数据。
+                            alert(res.msg);
+                            if (res.code === 1) {
+                                $btn.closest("tr").remove();  //找到按钮所在的那一整行 <tr>，并从页面上删除。
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            console.log("AJAX请求失败");
+                            console.log("textStatus:", textStatus);
+                            console.log("errorThrown:", errorThrown);
+                            console.log("响应内容:", jqXHR.responseText);
+                            alert("请求失败，请稍后重试");
+                        }
+                    });
+                }
+            })
+
+            //退出登录
+            $(document).on('click', '#logout-btn', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: 'php/logout.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.success) {
+                            loadNav();   // 刷新导航栏
+                            loadBooks(); // 刷新书籍
+                        }
+                    },
+                    error: function () {
+                        alert('退出登录失败');
+                    }
+                });
+            });
+
+        })
+
+    </script>
+</body>
+
+</html>

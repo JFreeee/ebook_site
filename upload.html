@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>上传图书</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar-custom {
+            height: 65px;
+            background-color: #414951;
+            /* 深灰色背景 */
+        }
+
+        .navbar-custom h2,
+        .navbar-custom .nav-link,
+        .navbar-custom .dropdown-toggle {
+            color: #fff;
+        }
+
+        h2 {
+            padding: 10px 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom px-4">
+        <h2 class="mb-0 mr-4">📤 上传图书</h2>&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" value="⬅返回首页" onclick="location='shouye.html'">
+
+        <!-- 导航菜单 -->
+        <ul class="navbar-nav ml-auto" id="nav-menu"></ul>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="form-group">
+            <h4>图书标题</h4>
+            <input type="text" id="title" class="form-control" required>
+        </div>
+        <br>
+        <div class="form-group">
+            <h4>封面图片</h4>
+            <input type="file" id="pic" accept="image/*" class="form-control-file" required>
+        </div>
+        <br>
+        <div class="form-group">
+            <h4>图书文件(pdf 或 epub)</h4>
+            <input type="file" id="bookfile" accept=".pdf,.epub" class="form-control-file" required>
+        </div>
+        <br>
+        <button id="uploadBtn" class="btn btn-primary">上传</button>
+
+        <div id="result" class="mt-3"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(function () {
+            loadNav();
+            // 渲染导航栏
+            function loadNav() {
+                $.ajax({
+                    url: './php/shouye.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function (data) {
+                        loggedIn = data.loggedIn;  // ✅ 保存登录状态
+                        let navHtml = '';
+
+                        if (data.loggedIn) {
+
+                            // 公共部分
+                            let menuItems = `
+                                <a class="dropdown-item" href="mypage.html">个人主页</a>
+                                <a class="dropdown-item" href="upload.html">上传图书</a>
+                            `;
+
+                            // 如果是管理员，加一个「管理员页面」
+                            if (data.is_admin == 1) {
+                                menuItems = `
+                                    <a class="dropdown-item" href="admin.html">管理员页面</a>
+                                    ${menuItems}
+                                `;
+                            }
+                            navHtml = `
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+                                        ${data.email}
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        ${menuItems}
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#" id="logout-btn">退出登录</a>
+                                    </div>
+                                </li>`;
+                        } else {
+                            navHtml = `<li class="nav-item"><a class="nav-link" href="index.html">登录</a></li>`;
+                        }
+                        $('#nav-menu').html(navHtml);
+                    },
+                    error: function () {
+                        alert('加载导航栏失败');
+                    }
+                });
+            }
+            
+            $("#uploadBtn").on("click", function () {
+                let title = $("#title").val();
+                let pic = $("#pic")[0].files[0];
+                let bookfile = $("#bookfile")[0].files[0];
+
+                if (!title || !pic || !bookfile) {
+                    $("#result").html(`<div class="alert alert-warning">请填写完整信息</div>`);
+                    return;
+                }
+
+                let formData = new FormData();
+                formData.append("title", title);
+                formData.append("pic", pic);
+                formData.append("bookfile", bookfile);
+
+                $.ajax({
+                    url: "php/upload.php",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    dataType: "json",
+                    success: function (res) {
+                        if (res.code === 1) {
+                            $("#result").html(`<div class="alert alert-success">${res.msg}</div>`);
+                        } else {
+                            $("#result").html(`<div class="alert alert-danger">${res.msg}</div>`);
+                        }
+                    },
+                    error: function () {
+                        $("#result").html(`<div class="alert alert-danger">上传失败，请稍后重试</div>`);
+                    }
+                });
+            });
+        })
+    </script>
+</body>
+
+</html>
