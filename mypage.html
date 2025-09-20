@@ -118,7 +118,7 @@
                                     <div class="dropdown-menu dropdown-menu-right">
                                         ${menuItems}
                                         <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="#" id="logout-btn">退出登录</a>
+                                        <a class="dropdown-item" href="index.html" id="logout-btn">退出登录</a>
                                     </div>
                                 </li>`;
                         } else {
@@ -258,8 +258,7 @@
                     dataType: 'json',
                     success: function (data) {
                         if (data.success) {
-                            loadNav();   // 刷新导航栏
-                            loadBooks(); // 刷新书籍
+                           window.location.href = 'index.html';
                         }
                     },
                     error: function () {

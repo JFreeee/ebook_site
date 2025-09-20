@@ -172,6 +172,25 @@
                     alert('加载书籍详情失败');
                 }
             });
+
+            //退出登录
+            $(document).on('click', '#logout-btn', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: 'php/logout.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.success) {
+                            loadNav();   // 刷新导航栏
+                            loadBooks(); // 刷新书籍
+                        }
+                    },
+                    error: function () {
+                        alert('退出登录失败');
+                    }
+                });
+            });
         });
     </script>
 </body>

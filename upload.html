@@ -106,6 +106,7 @@
                 });
             }
             
+            //上传图书
             $("#uploadBtn").on("click", function () {
                 let title = $("#title").val();
                 let pic = $("#pic")[0].files[0];
@@ -137,6 +138,25 @@
                     },
                     error: function () {
                         $("#result").html(`<div class="alert alert-danger">上传失败，请稍后重试</div>`);
+                    }
+                });
+            });
+
+            //退出登录
+            $(document).on('click', '#logout-btn', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: 'php/logout.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.success) {
+                            loadNav();   // 刷新导航栏
+                            loadBooks(); // 刷新书籍
+                        }
+                    },
+                    error: function () {
+                        alert('退出登录失败');
                     }
                 });
             });
