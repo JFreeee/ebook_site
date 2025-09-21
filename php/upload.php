@@ -29,6 +29,33 @@ function uploaderror($error_code) {
     return $errors[$error_code] ?? "未知错误";
 }
 
+// === 工具函数 ===
+// 检查 PDF 是否有效
+function isValidPDF($filePath) {
+    $fh = @fopen($filePath, 'rb');
+    if (!$fh) return false;
+    $header = fread($fh, 5);
+    if ($header !== '%PDF-') {
+        fclose($fh);
+        return false;
+    }
+    fseek($fh, -20, SEEK_END);
+    $tail = fread($fh, 20);
+    fclose($fh);
+    return strpos($tail, '%%EOF') !== false;
+}
+
+// 检查 EPUB 是否有效
+function isValidEPUB($filePath) {
+    $zip = new ZipArchive();
+    if ($zip->open($filePath) === TRUE) {
+        $ok = $zip->locateName("mimetype") !== false;
+        $zip->close();
+        return $ok;
+    }
+    return false;
+}
+
 // 检查必要字段
 if (empty($title) || !$pic || !$book) {
     echo json_encode(["code" => 0, "msg" => "请填写完整信息"]);
@@ -94,6 +121,30 @@ if (!move_uploaded_file($pic['tmp_name'], $picPath)) {
 }
 if (!move_uploaded_file($book['tmp_name'], $bookPath)) {
     echo json_encode(["code" => 0, "msg" => "图书文件保存失败"]);
+    exit;
+}
+
+// === 文件有效性检测 ===
+// 检查图片是否有效
+if (!@getimagesize($picPath)) {
+    unlink($picPath);
+    unlink($bookPath);
+    echo json_encode(["code" => 0, "msg" => "上传的封面图损坏或不是有效图片"]);
+    exit;
+}
+
+// 检查图书文件类型
+$ext = strtolower(pathinfo($book['name'], PATHINFO_EXTENSION));
+if ($ext === "pdf" && !isValidPDF($bookPath)) {
+    unlink($picPath);
+    unlink($bookPath);
+    echo json_encode(["code" => 0, "msg" => "上传的 PDF 文件损坏或不是有效 PDF"]);
+    exit;
+}
+if ($ext === "epub" && !isValidEPUB($bookPath)) {
+    unlink($picPath);
+    unlink($bookPath);
+    echo json_encode(["code" => 0, "msg" => "上传的 EPUB 文件损坏或不是有效 EPUB"]);
     exit;
 }
 
