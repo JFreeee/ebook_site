@@ -35,6 +35,19 @@ if (empty($title) || !$pic || !$book) {
     exit;
 }
 
+// 检查数据库是否已存在该书名
+$checkStmt = $con->prepare("SELECT id FROM ebooks WHERE title = ?");
+$checkStmt->bind_param("s", $title);
+$checkStmt->execute();
+$checkStmt->store_result();  //在执行了 SELECT 查询之后，把查询结果缓存到 PHP里
+if ($checkStmt->num_rows > 0) {
+    echo json_encode(["code" => 0, "msg" => "图书已存在"]);
+    $checkStmt->close();
+    $con->close();
+    exit;
+}
+$checkStmt->close();
+
 // 检查上传错误
 if ($pic['error'] !== UPLOAD_ERR_OK) {
     echo json_encode(["code" => 0, "msg" => "封面图上传失败：" . uploaderror($pic['error'])]);

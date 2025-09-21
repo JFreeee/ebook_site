@@ -13,7 +13,7 @@ $stmt = $con->prepare("SELECT file_path FROM ebooks WHERE id = ?");   //预处�
 $stmt->bind_param("i", $id);  //绑定参数，把$id绑定到上边的 ？上
 $stmt->execute();  //执行SQL
 $result = $stmt->get_result();   //返回select查询结果
-if ($result->num_rows === 0) {
+if ($result->num_rows == 0) {
     die("文件不存在");
   }
 
