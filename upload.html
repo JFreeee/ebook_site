@@ -5,23 +5,7 @@
     <meta charset="UTF-8">
     <title>上传图书</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .navbar-custom {
-            height: 65px;
-            background-color: #414951;
-            /* 深灰色背景 */
-        }
-
-        .navbar-custom h2,
-        .navbar-custom .nav-link,
-        .navbar-custom .dropdown-toggle {
-            color: #fff;
-        }
-
-        h2 {
-            padding: 10px 0px;
-        }
-    </style>
+    <link rel="stylesheet" href="css/upload.css">
 </head>
 
 <body>
@@ -117,7 +101,7 @@
                     return;
                 }
 
-                 // 文件名合法性校验函数
+                // 文件名合法性校验函数
                 function isValidName(name) {
                     return /^[\w\-]+$/.test(name); // 允许中文/英文/数字/下划线/短横线
                 }

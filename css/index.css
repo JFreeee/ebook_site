@@ -1,0 +1,14 @@
+.navbar-custom {
+    height: 65px;
+    background-color: #414951;
+}
+
+.navbar-custom h2,
+.navbar-custom .nav-link,
+.navbar-custom .dropdown-toggle {
+    color: #fff;
+}
+
+.form-inline input {
+    width: 300px;
+}

@@ -1,0 +1,26 @@
+.navbar-custom {
+    height: 65px;
+    background-color: #414951;
+    /* 深灰色背景 */
+}
+
+.navbar-custom h2 {
+    color: #fff;
+}
+
+.box0 {
+    width: 480px;
+    padding: 20px;
+    border: 1px solid #dddddd;
+    margin: 150px auto;
+    min-height: 100px;
+}
+
+.box0 h2 {
+    text-align: center;
+}
+
+#res_email,
+#res_password {
+    color: red;
+}
